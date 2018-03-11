@@ -1,0 +1,147 @@
+header{
+
+    margin: 0 auto; 
+    height: 80px;
+    background-color: #fafafa;
+    border-bottom: 1px solid #ebebeb;
+}
+
+#admin-gui-header{
+    background-color: #fff;
+    border-bottom: none;
+}
+
+main{
+    width: 1000px;
+    margin: 0 auto;
+    height: 1000px;
+}
+
+.content p:nth-child(1) {
+    font-family: sans-serif;
+    color: orange;
+    font-size: 152%;
+    font-weight: bold;
+}
+
+.content p:nth-child(2) {
+    font-family: sans-serif;
+    color: black;
+}
+
+#add-button{
+    float: right;
+    margin-right: 50px;
+    margin-top: 20px;
+    position: absolute;
+}
+
+#search-main{
+    margin-left: 180px;
+}
+
+main section:nth-child(1){
+    width: 272px;
+    height: 92px;
+    background: url(../images/emanuel-logo.png) no-repeat center;
+    margin: 260px auto 0;
+}
+
+#resultStats{
+    color: #808080; 
+    padding: 0 8px 0 0px;
+    line-height: 43px;
+}
+
+.res{
+    clear: both;
+}
+
+.res h3 {
+    font-size: 18px;
+    margin-bottom: 2px;
+    margin-top: 4px;
+}
+
+.res a:link{
+    color: #1a0dab;
+}
+
+#drop_zone {
+  border: 5px solid blue;
+  width:  200px;
+  height: 100px;
+}
+
+
+.loc{
+    color: #006621;
+    font-style: normal;
+}
+
+#admin-button{
+    position: absolute;
+    top: 50px;
+    right: 100px;
+}
+
+#logoff-button{
+    float: right;
+    margin-right: 20px;
+    margin-top: 20px;
+}
+
+.edit-delete{
+    width: 200px;
+    height: 60px;
+    float: left;
+}
+
+.edit-delete button:nth-child(1){
+    margin-left: 30px;
+}
+
+.edit-delete button:nth-child(2){
+    margin-left: 10px;
+}
+
+
+.explain{
+    margin-bottom: 20px;
+    width: 700px;
+    text-align: justify;
+    float: left;
+}
+
+.st{
+    font-size: small;
+    font-family: arial,sans-serif;
+    text-align: justify;
+}
+
+#imaginary_container{
+    margin-top:10px; 
+}
+.stylish-input-group .input-group-addon{
+    background: white !important; 
+}
+.stylish-input-group .form-control{
+    border-right:0; 
+    box-shadow:0 0 0; 
+    border-color:#ccc;
+}
+.stylish-input-group button{
+    border:0;
+    background:transparent;
+}
+
+.navbar-header{
+    width: 120px;
+    height: 44px;
+    background-image: url(../images/emanuel-small.png);
+    margin-top: 12px;
+}
+
+.navbar.navbar-light{
+    margin-top: 10px;
+}

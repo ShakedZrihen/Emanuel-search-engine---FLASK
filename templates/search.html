@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Search</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <header>
+            <nav class="navbar navbar-light">
+                <div class="container-fluid">
+                    <a href="/">
+                        <div class="navbar-header">
+
+                        </div>
+                    </a>
+                    <form method="GET" action="/search">
+                        <div class="col-xs-3">
+                            <div id="imaginary_container"> 
+                                <div class="input-group stylish-input-group">
+                                    <input type="text" class="form-control input-lg"  name="query" value="{{ query }}" >
+                                    <span class="input-group-addon">
+                                        <button type="submit">
+                                            <span class="glyphicon glyphicon-search"></span>
+                                        </button>  
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </nav>
+        </header>
+        <main id="search-main">
+            <div id="resultStats">
+                About {{ len }} results<nobr> &nbsp;</nobr>
+            </div>
+            {% for doc in data %}
+            <div class="res">
+                <h3> <a target="_blank" href="/documents/{{doc[0]}}">{{ doc[1] }}</a></h3>
+            </div>
+            <div class="loc">
+                {{ doc[5] }}
+            </div>
+           <div class="explain">
+                <span class="st">
+                    {{ doc[4] }}
+                </span>
+            </div>
+            {% endfor %}
+
+        </main>
+    </body>
+</html>
+
+
+
