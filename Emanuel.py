@@ -50,7 +50,7 @@ def display_document(doc_id):
 def show_admin():
     global IS_ADMIN
     IS_ADMIN = True
-    return render_template('admingui.html', len=0, message="none")
+    return render_template('admingui.html', len=0, message_display="none", message="")
 
 
 @app.route('/upload', methods=['POST'])
@@ -65,12 +65,19 @@ def upload():
             author=author,
             subject=subject
         )
-    return render_template('admingui.html', len=0, message="block")
+    return render_template('admingui.html', len=0, message_display="block", message="File was uploaded successfully")
+
+
+@app.route('/build-dict')
+def re_index():
+    my_db.build_dictionary()
+    return render_template('admingui.html', len=0, message_display="block", message="Dictionary was updated!")
 
 
 @app.route('/delete/<int:doc_id>')
 def delete(doc_id):
     my_db.delete(doc_id)
+    return render_template('admingui.html', len=0, message_display="block", message="File was delete!")
 
 
 @app.route('/restore/<int:doc_id>')

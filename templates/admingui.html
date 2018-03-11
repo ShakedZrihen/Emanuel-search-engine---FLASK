@@ -48,9 +48,10 @@
                 <div class="form-group">
                     <input type="file" name="file" accept="text/*" multiple><br>
                     <input type="submit" value="upload file" class="btn btn-primary">
+                    <a id="build-button" type="button" class="btn btn-success" href="/build-dict" style="margin-left:20px; ">Add to dict</a>
                 </div>
             </form>
-            <div style="display: {{ message }}"><h5 class="message">Upload successful</h5></div>
+            <div style="display: {{ message_display }}"><h5 class="message">{{ message }}</h5></div>
 
 
             <div id="resultStats">

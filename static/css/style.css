@@ -67,6 +67,10 @@ main section:nth-child(1){
     color: #1a0dab;
 }
 
+.btn-danger{
+    margin-left: 15%;
+}
+
 #drop_zone {
   border: 5px solid blue;
   width:  200px;
