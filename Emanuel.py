@@ -46,5 +46,10 @@ def display_document(doc_id):
         return render_template('resalt.html', text=str_res)
 
 
+@app.route('/upload/<string:doc_name>')
+def upload(doc_name):
+    my_db.load_new_doc("E:\Emanuel\inputFiles\\{}.docx".format(doc_name), title=doc_name, author="The Beatles", subject="Song")
+
+
 if __name__ == '__main__':
     app.run()

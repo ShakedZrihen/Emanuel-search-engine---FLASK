@@ -3,9 +3,56 @@ import mysql.connector
 import os
 from mysql.connector import errorcode
 from DB import config
+from DB.dictionary import Dictionary
 from collections import Counter
 from collections import deque
-import re
+
+
+def order_query(query):
+    precedence = {}
+    precedence['!'] = 3
+    precedence['&'] = 2
+    precedence['|'] = 1
+    precedence['('] = 0
+    precedence[')'] = 0
+
+    output = []
+    operator_stack = []
+
+    # while there are tokens to be read
+    for token in query:
+
+        # if left bracket
+        if token == '(':
+            operator_stack.append(token)
+
+        # if right bracket, pop all operators from operator stack onto output until we hit left bracket
+        elif token == ')':
+            operator = operator_stack.pop()
+            while operator != '(':
+                output.append(operator)
+                operator = operator_stack.pop()
+
+        # if operator, pop operators from operator stack to queue if they are of higher precedence
+        elif token in precedence:
+            # if operator stack is not empty
+            if operator_stack:
+                current_operator = operator_stack[-1]
+                while operator_stack and precedence[current_operator] > precedence[token]:
+                    output.append(operator_stack.pop())
+                    if operator_stack:
+                        current_operator = operator_stack[-1]
+
+            operator_stack.append(token)  # add token to stack
+
+        # else if operands, add to output list
+        else:
+            output.append(token.lower())
+
+    # while there are still operators on the stack, pop them into the queue
+    while operator_stack:
+        output.append(operator_stack.pop())
+    return output
 
 
 class DBHandler(object):
@@ -13,16 +60,6 @@ class DBHandler(object):
         self._db = None
         self._cur = None
         self._dictionary = None
-        self._doc_list = set()
-        self._stop_list = ["i", "and", "a", "an", "the", "to", "for", "no", "yes"]
-        self._operators = {
-            '&': '%26',
-            '|': '%7c',
-            '!': '%21',
-            '"': '%22',
-            '(': '%28',
-            ')': '%28'
-        }
 
     def connect(self):
         try:
@@ -53,19 +90,12 @@ class DBHandler(object):
                 print "OK"
 
     def build_dictionary(self):
-        self._dictionary = {}
+        self._dictionary = Dictionary()
         self._cur.execute(
             "SELECT term, doc_id FROM emanueldb.posting_file"
         )
         posting_file_table = self._cur.fetchall()
-        for row in posting_file_table:
-            term = row[0]
-            doc = row[1]
-            if term in self._dictionary:
-                self._dictionary[term].append(doc)
-            else:
-                self._dictionary[term] = [doc]
-            self._doc_list.add(doc)
+        self._dictionary.build_dictionary_from_table(posting_file_table)
 
     def __insert_to_documents__(self, **kwargs):
         print "inserting to: Documents table"
@@ -109,18 +139,18 @@ class DBHandler(object):
         doc_id = self.__generate_id__()
         try:
             document = Document(doc_path)
-            storedFiles = "E:\Emanuel\storedFiles\{}.docx".format(doc_id)
-            document.save(storedFiles)
+            stored_files = "E:\Emanuel\storedFiles\{}.docx".format(doc_id)
+            document.save(stored_files)
             text = document.paragraphs[1].text.split('\n')
             brief = ' '.join(text[:5])
-            self.__insert_to_documents__(doc_id=doc_id, title=title, author=author, subject=subject, brief=brief, location=storedFiles)
+            self.__insert_to_documents__(doc_id=doc_id, title=title, author=author, subject=subject, brief=brief, location=stored_files)
         except Exception as e:
             print "error loading Doc: {}".format(e)
             return
         else:
             self.__parse_file__(document, doc_id)
             os.remove(doc_path)
-            print("File was transferred from inputFiles to storedFiles")
+            print("File was transferred from inputFiles to stored_files")
 
     def __generate_id__(self):
         self._cur.execute("SELECT COUNT(*) FROM emanueldb.documents", )
@@ -146,66 +176,6 @@ class DBHandler(object):
             docs.append((doc_id, doc_title, doc_author, doc_subject, doc_brief, doc_location))
         return docs
 
-    def __execute_AND__(self, right_operand, left_operand):
-        result = list(set(right_operand) & set(left_operand))
-        return result
-
-    def __execute_OR__(self, right_operand, left_operand):
-        result = list(set(right_operand) | set(left_operand))
-        return list(result)
-
-    def __execute_NOT__(self, right_operand):
-        result = [doc for doc in self._doc_list if doc not in right_operand]
-        if len(result) < 1:
-            return [[]]
-        return result
-
-    def __order_query__(self, query):
-        precedence = {}
-        precedence['!'] = 3
-        precedence['&'] = 2
-        precedence['|'] = 1
-        precedence['('] = 0
-        precedence[')'] = 0
-
-        output = []
-        operator_stack = []
-
-        # while there are tokens to be read
-        for token in query:
-
-            # if left bracket
-            if token == '(':
-                operator_stack.append(token)
-
-            # if right bracket, pop all operators from operator stack onto output until we hit left bracket
-            elif token == ')':
-                operator = operator_stack.pop()
-                while operator != '(':
-                    output.append(operator)
-                    operator = operator_stack.pop()
-
-            # if operator, pop operators from operator stack to queue if they are of higher precedence
-            elif token in precedence:
-                # if operator stack is not empty
-                if operator_stack:
-                    current_operator = operator_stack[-1]
-                    while operator_stack and precedence[current_operator] > precedence[token]:
-                        output.append(operator_stack.pop())
-                        if operator_stack:
-                            current_operator = operator_stack[-1]
-
-                operator_stack.append(token)  # add token to stack
-
-            # else if operands, add to output list
-            else:
-                output.append(token.lower())
-
-        # while there are still operators on the stack, pop them into the queue
-        while operator_stack:
-            output.append(operator_stack.pop())
-        return output
-
     def __split_query_to_array(self, query):
         query = query.replace(")", "+)+")
         query = query.replace("(", "+(+")
@@ -225,12 +195,12 @@ class DBHandler(object):
         for word in query:
             global word
             query_list.append(word.replace(" ", ""))
-        words = filter(lambda a_word: a_word not in self._operators, query)
+        words = filter(lambda a_word: a_word not in self._dictionary.operators, query)
         return query_list, words
 
     def __parse_query__(self, query):
         query_list, words = self.__split_query_to_array(query)
-        query_queue = deque(self.__order_query__(query_list))
+        query_queue = deque(order_query(query_list))
         final_result = []
         while query_queue:
             token = query_queue.popleft()
@@ -238,15 +208,15 @@ class DBHandler(object):
             temp_result = []
 
             # if operand in dictionary
-            if token not in self._operators and token in self._dictionary:
-                temp_result.append(self._dictionary[token])
+            if token not in self._dictionary.operators and token in self._dictionary.get_dictionary():
+                temp_result.append(self._dictionary.find_in_dictionary(token))
 
             elif token == '&':  # if token == & (AND)
                 try:
                     right_operand = final_result.pop()
                     left_operand = final_result.pop()
                     # print "{} & {}".format(right_operand, left_operand)   FOR DEBUG ONLY
-                    temp_result = [self.__execute_AND__(right_operand, left_operand)]
+                    temp_result = [self._dictionary.__execute_AND__(right_operand, left_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -256,7 +226,7 @@ class DBHandler(object):
                     right_operand = final_result.pop()
                     left_operand = final_result.pop()
                     # print "{} | {}".format(right_operand, left_operand)   FOR DEBUG ONLY
-                    temp_result = [self.__execute_OR__(right_operand, left_operand)]
+                    temp_result = [self._dictionary.__execute_OR__(right_operand, left_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -265,7 +235,7 @@ class DBHandler(object):
                 try:
                     right_operand = final_result.pop()
                     # print "!{}".format(right_operand)  FOR DEBUG ONLY
-                    temp_result = [self.__execute_NOT__(right_operand)]
+                    temp_result = [self._dictionary.__execute_NOT__(right_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
