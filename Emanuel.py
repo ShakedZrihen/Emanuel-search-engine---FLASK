@@ -30,10 +30,12 @@ def search():
     query = query.replace("%28", "(")
     query = query.replace("%21", "!")
     query = query.replace("%22", '"')
+    filtered_data = filter(lambda doc: doc[0] not in my_db.dictionary.hidden_docs, data)
     if IS_ADMIN:
-        return render_template('admingui.html', data=data, len=len(data), query=query)
+        hidden = filter(lambda doc: doc[0] in my_db.dictionary.hidden_docs, data)
+        return render_template('admingui.html', data=filtered_data, hidden=hidden, len=len(data), query=query)
     else:
-        return render_template('search.html', data=data, len=len(data), query=query)
+        return render_template('search.html', data=filtered_data, len=len(filtered_data), query=query)
 
 
 @app.route('/documents/<int:doc_id>')
@@ -77,12 +79,19 @@ def re_index():
 @app.route('/delete/<int:doc_id>')
 def delete(doc_id):
     my_db.delete(doc_id)
-    return render_template('admingui.html', len=0, message_display="block", message="File was delete!")
+    return render_template('admingui.html',
+                           len=0,
+                           message_display="block",
+                           message="document number: {} was delete!".format(doc_id))
 
 
 @app.route('/restore/<int:doc_id>')
 def restore(doc_id):
     my_db.restore(doc_id)
+    return render_template('admingui.html',
+                           len=0,
+                           message_display="block",
+                           message="Document number: {} was restored!!".format(doc_id))
 
 
 @app.route('/logoff')

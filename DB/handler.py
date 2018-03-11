@@ -54,7 +54,7 @@ class DBHandler(object):
     def __init__(self):
         self._db = None
         self._cur = None
-        self._dictionary = None
+        self.dictionary = Dictionary()
 
     def connect(self):
         try:
@@ -85,12 +85,11 @@ class DBHandler(object):
                 print "OK"
 
     def build_dictionary(self):
-        self._dictionary = Dictionary()
         self._cur.execute(
             "SELECT term, doc_id FROM emanueldb.posting_file"
         )
         posting_file_table = self._cur.fetchall()
-        self._dictionary.build_dictionary_from_table(posting_file_table)
+        self.dictionary.build_dictionary_from_table(posting_file_table)
 
     def __insert_to_documents__(self, **kwargs):
         print "inserting to: Documents table"
@@ -190,7 +189,7 @@ class DBHandler(object):
         for word in query:
             global word
             query_list.append(word.replace(" ", ""))
-        words = filter(lambda a_word: a_word not in self._dictionary.operators, query)
+        words = filter(lambda a_word: a_word not in self.dictionary.operators, query)
         return query_list, words
 
     def __parse_query__(self, query):
@@ -203,15 +202,15 @@ class DBHandler(object):
             temp_result = []
 
             # if operand in dictionary
-            if token not in self._dictionary.operators and token in self._dictionary.get_dictionary():
-                temp_result.append(self._dictionary.find_in_dictionary(token))
+            if token not in self.dictionary.operators and token in self.dictionary.get_dictionary():
+                temp_result.append(self.dictionary.find_in_dictionary(token))
 
             elif token == '&':  # if token == & (AND)
                 try:
                     right_operand = final_result.pop()
                     left_operand = final_result.pop()
                     # print "{} & {}".format(right_operand, left_operand)   FOR DEBUG ONLY
-                    temp_result = [self._dictionary.execute_and(right_operand, left_operand)]
+                    temp_result = [self.dictionary.execute_and(right_operand, left_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -221,7 +220,7 @@ class DBHandler(object):
                     right_operand = final_result.pop()
                     left_operand = final_result.pop()
                     # print "{} | {}".format(right_operand, left_operand)   FOR DEBUG ONLY
-                    temp_result = [self._dictionary.execute_or(right_operand, left_operand)]
+                    temp_result = [self.dictionary.execute_or(right_operand, left_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -230,7 +229,7 @@ class DBHandler(object):
                 try:
                     right_operand = final_result.pop()
                     # print "!{}".format(right_operand)  FOR DEBUG ONLY
-                    temp_result = [self._dictionary.execute_not(right_operand)]
+                    temp_result = [self.dictionary.execute_not(right_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -245,13 +244,14 @@ class DBHandler(object):
         if len(result) > 0:
             for doc in result:
                 docs.add(doc)
+        docs = self.dictionary.sort(docs, words)
         return self.__get_docs_by_id__(docs), words
 
     def delete(self, doc):
-        self._dictionary.hide_doc(doc)
+        self.dictionary.hide_doc(doc)
 
     def restore(self, doc):
-        self._dictionary.un_hide_doc(doc)
+        self.dictionary.un_hide_doc(doc)
 
     def close_connection(self):
         self._db.close()

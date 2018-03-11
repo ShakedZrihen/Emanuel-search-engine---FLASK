@@ -1,3 +1,4 @@
+from collections import Counter, OrderedDict
 
 
 class Dictionary(object):
@@ -13,7 +14,7 @@ class Dictionary(object):
             ')': '%28'
         }
         self._doc_list = set()
-        self._hidden_docs = []
+        self.hidden_docs = []
 
     def build_dictionary_from_table(self, table):
         self._dictionary = {}
@@ -34,7 +35,7 @@ class Dictionary(object):
 
     def find_in_dictionary(self, word):
         try:
-            return filter(lambda doc: doc not in self._hidden_docs, self._dictionary[word])
+            return self._dictionary[word]
         except KeyError:
             return []
 
@@ -53,7 +54,24 @@ class Dictionary(object):
         return result
 
     def hide_doc(self, doc_id):
-        self._hidden_docs.append(doc_id)
+        self.hidden_docs.append(doc_id)
+        print self.hidden_docs
 
     def un_hide_doc(self, doc_id):
-        self._hidden_docs.remove(doc_id)
+        self.hidden_docs.remove(doc_id)
+
+    def sort(self, docs_list, query):
+        temp_list = []
+        for word in query:
+            if word in self._dictionary:
+                for doc in self._dictionary[word]:
+                    temp_list.append(doc)
+        sorted_dict = Counter(temp_list)
+        sorted_dict = sorted(sorted_dict.items(), key=lambda x: x[1])
+        sorted_dict.reverse()
+        sorted_list = []
+        for key in sorted_dict:
+            if key[0] in docs_list:
+                sorted_list.append(key[0])
+        return sorted_list
+

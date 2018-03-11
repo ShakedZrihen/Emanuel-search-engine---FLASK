@@ -77,6 +77,26 @@
                     </div>
                 </div>
             {% endfor %}
+            {% for doc in hidden %}
+                <div class="doc-result" id="{{ doc[0] }}">
+                    <div class="res">
+                        <h3> <a target="_blank" href="/documents/{{doc[0]}}">{{ doc[1] }}</a></h3>
+                    </div>
+                    <div class="loc">
+                        {{ doc[5] }}
+                    </div>
+                    <div class="explain">
+                        <span class="st">
+                            {{ doc[4] }}
+                        </span>
+                    </div>
+                    <div class="edit-delete">
+                        <a href="/restore/{{ doc[0] }}" type="button" class="btn btn-success" aria-label="Left Align">
+                            <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
         </main>
     </body>
 </html>

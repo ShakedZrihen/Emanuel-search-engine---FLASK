@@ -67,7 +67,7 @@ main section:nth-child(1){
     color: #1a0dab;
 }
 
-.btn-danger{
+.btn-danger, .btn-success{
     margin-left: 15%;
 }
 
