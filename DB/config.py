@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import os
 
 
 config = {
@@ -8,6 +9,8 @@ config = {
     'database': 'emanueldb',
     'raise_on_warnings': True,
 }
+
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TABLES = OrderedDict()
 

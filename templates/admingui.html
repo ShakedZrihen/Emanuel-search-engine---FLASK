@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Bootstrap Example</title>
+        <title>Admin Panel</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="includes/style.css">
+        <link rel="stylesheet" type="text/css" href="../static/css/style.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -20,7 +20,7 @@
                         <div class="col-xs-3">
                             <div id="imaginary_container"> 
                                 <div class="input-group stylish-input-group">
-                                    <input type="text" class="form-control input-lg"  placeholder="Search" >
+                                    <input type="text" class="form-control input-lg" name="query" placeholder="Search" >
                                     <span class="input-group-addon">
                                         <button type="submit">
                                             <span class="glyphicon glyphicon-search"></span>
@@ -30,55 +30,52 @@
                             </div>
                         </div>
                     </form>
-                    <a id="add-button" type="button" class="button btn btn-success " >Add New Doc</a>
-                   <a id="logoff-button" type="button" class="button btn btn-info" href="index.html">LogOff</a>
+                       <a id="logoff-button" type="button" class="button btn btn-info" href="/logoff">LogOff</a>
                 </div>
             </nav>
         </header>
         <main id="search-main">
+            <form form class="uploadform" action="/upload" method="POST" enctype="multipart/form-data">
+                <h3>Documents Uploader</h3>
+                <div class="form-group" style="width: 200px">
+                    <label for="pwd">Author:</label>
+                    <input type="text" class="form-control" name="author" placeholder="author">
+                </div>
+                <div class="form-group" style="width: 200px">
+                    <label for="pwd">Subject:</label>
+                    <input type="text"  class="form-control" name="subject" placeholder="subject">
+                </div>
+                <div class="form-group">
+                    <input type="file" name="file" accept="text/*" multiple><br>
+                    <input type="submit" value="upload file" class="btn btn-primary">
+                </div>
+            </form>
+            <div style="display: {{ message }}"><h5 class="message">Upload successful</h5></div>
+
+
             <div id="resultStats">
-                About 75,400,000 results<nobr> (0.48 seconds)&nbsp;</nobr>
+                About {{ len }} results<nobr> &nbsp;</nobr>
             </div>
-            <div class="res">
-                <h3> <a href="#">Used Cars for Sale - CarMax</a></h3>
-            </div>
-            <div class="loc">
-                https://www.carmax.com/cars
-            </div>
-            <div class="explain">
-                <span class="st">A <em>car</em> (or automobile) is a wheeled motor vehicle used for transportation. Most definitions of <em>car</em> say they run primarily on roads, seat one to eight people, have four tires, and mainly transport people rather than goods. <em>Cars</em> came into global use during the 20th century, and developed economies depend on them. The year&nbsp;...
-                </span>
-            </div>
-            <div class="edit-delete">
-                <button type="button" class="btn btn-info" aria-label="Left Align" >
-                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-                </button>
-                <button type="button" class="btn btn-danger" aria-label="Left Align">
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="res">
-                <h3> <a href="#">Used Cars for Sale - CarMax</a></h3>
-            </div>
-            <div class="loc">
-                https://www.carmax.com/cars
-            </div>
-            <div class="explain">
-                <span class="st">A <em>car</em> (or automobile) is a wheeled motor vehicle used for transportation. Most definitions of <em>car</em> say they run primarily on roads, seat one to eight people, have four tires, and mainly transport people rather than goods. <em>Cars</em> came into global use during the 20th century, and developed economies depend on them. The year&nbsp;...
-                    (or automobile) is a wheeled motor vehicle used for transportation. Most definitions of <em>car</em> say they run primarily on roads, seat one to eight people, have four tires, and mainly transport people rather than goods. <em>Cars</em> came into global use during the 20th century, and developed economies depend on them. The year&nbsp;...
-                </span>
-            </div>
-            <div class="edit-delete">
-                <button type="button" class="btn btn-info" aria-label="Left Align" >
-                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-                </button>
-                <button type="button" class="btn btn-danger" aria-label="Left Align">
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                </button>
-            </div>
-
-
-
+            {% for doc in data %}
+                <div class="doc-result" id="{{ doc[0] }}">
+                    <div class="res">
+                        <h3> <a target="_blank" href="/documents/{{doc[0]}}">{{ doc[1] }}</a></h3>
+                    </div>
+                    <div class="loc">
+                        {{ doc[5] }}
+                    </div>
+                    <div class="explain">
+                        <span class="st">
+                            {{ doc[4] }}
+                        </span>
+                    </div>
+                    <div class="edit-delete">
+                        <a href="/delete/{{ doc[0] }}" type="button" class="btn btn-danger" aria-label="Left Align">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
         </main>
     </body>
 </html>

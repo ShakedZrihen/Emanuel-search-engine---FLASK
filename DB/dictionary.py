@@ -13,6 +13,7 @@ class Dictionary(object):
             ')': '%28'
         }
         self._doc_list = set()
+        self._hidden_docs = []
 
     def build_dictionary_from_table(self, table):
         self._dictionary = {}
@@ -33,21 +34,26 @@ class Dictionary(object):
 
     def find_in_dictionary(self, word):
         try:
-            return self._dictionary[word]
+            return filter(lambda doc: doc not in self._hidden_docs, self._dictionary[word])
         except KeyError:
             return []
 
-    def __execute_AND__(self, right_operand, left_operand):
+    def execute_and(self, right_operand, left_operand):
         result = list(set(right_operand) & set(left_operand))
         return result
 
-    def __execute_OR__(self, right_operand, left_operand):
+    def execute_or(self, right_operand, left_operand):
         result = list(set(right_operand) | set(left_operand))
         return list(result)
 
-    def __execute_NOT__(self, right_operand):
+    def execute_not(self, right_operand):
         result = [doc for doc in self._doc_list if doc not in right_operand]
         if len(result) < 1:
             return [[]]
         return result
 
+    def hide_doc(self, doc_id):
+        self._hidden_docs.append(doc_id)
+
+    def un_hide_doc(self, doc_id):
+        self._hidden_docs.remove(doc_id)

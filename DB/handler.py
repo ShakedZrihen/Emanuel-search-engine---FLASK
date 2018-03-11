@@ -9,12 +9,7 @@ from collections import deque
 
 
 def order_query(query):
-    precedence = {}
-    precedence['!'] = 3
-    precedence['&'] = 2
-    precedence['|'] = 1
-    precedence['('] = 0
-    precedence[')'] = 0
+    precedence = {'!': 3, '&': 2, '|': 1, '(': 0, ')': 0}
 
     output = []
     operator_stack = []
@@ -216,7 +211,7 @@ class DBHandler(object):
                     right_operand = final_result.pop()
                     left_operand = final_result.pop()
                     # print "{} & {}".format(right_operand, left_operand)   FOR DEBUG ONLY
-                    temp_result = [self._dictionary.__execute_AND__(right_operand, left_operand)]
+                    temp_result = [self._dictionary.execute_and(right_operand, left_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -226,7 +221,7 @@ class DBHandler(object):
                     right_operand = final_result.pop()
                     left_operand = final_result.pop()
                     # print "{} | {}".format(right_operand, left_operand)   FOR DEBUG ONLY
-                    temp_result = [self._dictionary.__execute_OR__(right_operand, left_operand)]
+                    temp_result = [self._dictionary.execute_or(right_operand, left_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -235,7 +230,7 @@ class DBHandler(object):
                 try:
                     right_operand = final_result.pop()
                     # print "!{}".format(right_operand)  FOR DEBUG ONLY
-                    temp_result = [self._dictionary.__execute_NOT__(right_operand)]
+                    temp_result = [self._dictionary.execute_not(right_operand)]
                 except Exception as e:
                     print "error popping from queue: {}".format(e)
                     temp_result = [[]]
@@ -251,6 +246,12 @@ class DBHandler(object):
             for doc in result:
                 docs.add(doc)
         return self.__get_docs_by_id__(docs), words
+
+    def delete(self, doc):
+        self._dictionary.hide_doc(doc)
+
+    def restore(self, doc):
+        self._dictionary.un_hide_doc(doc)
 
     def close_connection(self):
         self._db.close()
