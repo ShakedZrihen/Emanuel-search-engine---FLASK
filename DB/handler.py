@@ -86,7 +86,7 @@ class DBHandler(object):
 
     def build_dictionary(self):
         self._cur.execute(
-            "SELECT term, doc_id FROM emanueldb.posting_file"
+            "SELECT * FROM emanueldb.posting_file"
         )
         posting_file_table = self._cur.fetchall()
         self.dictionary.build_dictionary_from_table(posting_file_table)
@@ -200,6 +200,10 @@ class DBHandler(object):
             token = query_queue.popleft()
             token = token.lower()
             temp_result = []
+
+            if token.find("*") != -1:
+                words += self.dictionary.get_wildcard_words(token)
+                temp_result.append(self.dictionary.find_in_dictionary(token))
 
             # if operand in dictionary
             if token not in self.dictionary.operators and token in self.dictionary.get_dictionary():
